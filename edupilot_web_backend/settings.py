@@ -130,3 +130,24 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'edupilotlms@gmail.com'
 EMAIL_HOST_PASSWORD = 'gfxd rkwp rkig dlht'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+INSTALLED_APPS += ['rest_framework', 'corsheaders']
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# JWT config (optional settings)
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+}
+
+CORS_ALLOWED_ORIGINS = [
+    "https://edupilot-web-1.onrender.com",  # your frontend URL
+]
+
+RESET_CODE_EXPIRY_MINUTES = 15
