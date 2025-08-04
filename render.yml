@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: edupilot-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn edupilot_backend.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        value: e67t3&)wwf1gjx4y82z_%-o6_ppg+$^)(&w9jmj(bggjyd35!$
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: yourdomain.com

@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-w#q&hs6t+zjis87%se-d+j-d^n8#nr52o0!&z&b9k6kng+itko
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['edupilot-backend-f5sa.onrender.com']
 
 
 # Application definition
@@ -38,16 +38,21 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "accounts",
+    "corsheaders",
+
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
+
 ]
 
 ROOT_URLCONF = "edupilot_web_backend.urls"
@@ -147,7 +152,9 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://edupilot-web-1.onrender.com",  # your frontend URL
+    "https://edupilot-web-1.onrender.com", 
+    "https://edupilot-web.web.app", # your frontend URL
+    "http://localhost:3000", 
 ]
 
 RESET_CODE_EXPIRY_MINUTES = 15
