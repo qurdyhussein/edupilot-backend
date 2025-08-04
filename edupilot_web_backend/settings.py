@@ -136,7 +136,7 @@ EMAIL_HOST_USER = 'edupilotlms@gmail.com'
 EMAIL_HOST_PASSWORD = 'gfxd rkwp rkig dlht'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-INSTALLED_APPS += ['rest_framework', 'corsheaders']
+INSTALLED_APPS += ['rest_framework']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
