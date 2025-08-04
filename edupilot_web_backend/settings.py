@@ -152,9 +152,10 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:51020",
     "https://edupilot-web-1.onrender.com", 
     "https://edupilot-web.web.app", # your frontend URL
-    "http://localhost:3000", 
+    
 ]
 
 RESET_CODE_EXPIRY_MINUTES = 15
