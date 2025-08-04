@@ -91,12 +91,11 @@ def admin_login(request):
     return Response({"error": "Email au password si sahihi."},
                     status=status.HTTP_401_UNAUTHORIZED)
 
-class RequestPasswordResetView(APIView):
-    permission_classes = [AllowAny]
 
+class RequestPasswordResetView(APIView):
     def post(self, request):
-        email = request.data.get('email')
         try:
+            email = request.data.get('email')
             user = User.objects.get(email=email)
             profile, _ = Profile.objects.get_or_create(user=user)
 
@@ -116,6 +115,10 @@ class RequestPasswordResetView(APIView):
 
         except User.DoesNotExist:
             return Response({'error': 'Hakuna akaunti yenye email hiyo.'}, status=404)
+
+        except Exception as e:
+            print(f"Error sending email: {e}")  # Optional for logs
+            return Response({'error': str(e)}, status=500)
 
 class ConfirmPasswordResetView(APIView):
     permission_classes = [AllowAny]
