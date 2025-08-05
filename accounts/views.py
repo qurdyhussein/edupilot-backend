@@ -1,8 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.generics import CreateAPIView
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
@@ -10,10 +12,12 @@ from django.utils.crypto import get_random_string
 from django.utils import timezone
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-import jwt
-import datetime
 from django.conf import settings
 from accounts.models import Profile
+from .models import Institution
+from .serializers import InstitutionSerializer
+import jwt
+import datetime
 
 RESET_CODE_EXPIRY_MINUTES = getattr(settings, 'RESET_CODE_EXPIRY_MINUTES', 15)
 
@@ -91,7 +95,6 @@ def admin_login(request):
     return Response({"error": "Email au password si sahihi."},
                     status=status.HTTP_401_UNAUTHORIZED)
 
-
 class RequestPasswordResetView(APIView):
     def post(self, request):
         try:
@@ -117,7 +120,7 @@ class RequestPasswordResetView(APIView):
             return Response({'error': 'Hakuna akaunti yenye email hiyo.'}, status=404)
 
         except Exception as e:
-            print(f"Error sending email: {e}")  # Optional for logs
+            print(f"Error sending email: {e}")
             return Response({'error': str(e)}, status=500)
 
 class ConfirmPasswordResetView(APIView):
@@ -156,3 +159,22 @@ class ConfirmPasswordResetView(APIView):
 
         except User.DoesNotExist:
             return Response({'error': 'Mtumiaji hajapatikana.'}, status=404)
+
+# ✅ Institution Create with Logo Upload
+class InstitutionCreateView(CreateAPIView):
+    queryset = Institution.objects.all()
+    serializer_class = InstitutionSerializer
+    permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser]
+
+# ✅ Check if institution name exists
+class InstitutionNameCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        name = request.query_params.get("name")
+        if not name:
+            return Response({"error": "Institution name is required."}, status=400)
+
+        exists = Institution.objects.filter(name__iexact=name).exists()
+        return Response({"exists": exists}, status=200)
