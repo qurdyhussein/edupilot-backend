@@ -16,18 +16,20 @@ class InstitutionSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['created_by', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
 
     def validate_name(self, value):
+        value = value.strip()
         if Institution.objects.filter(name__iexact=value).exists():
-            raise serializers.ValidationError("Institution name already exists.")
+            raise serializers.ValidationError("Institution name already exists. Tafadhali chagua jina lingine.")
         return value
 
     def validate_code(self, value):
+        value = value.strip()
         if Institution.objects.filter(code__iexact=value).exists():
-            raise serializers.ValidationError("Institution code already exists.")
+            raise serializers.ValidationError("Institution code already exists. Tafadhali tumia code nyingine.")
         if not value.isalnum():
-            raise serializers.ValidationError("Code must be alphanumeric.")
+            raise serializers.ValidationError("Code must be alphanumeric (herufi na namba tu).")
         return value
 
     def create(self, validated_data):

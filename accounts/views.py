@@ -167,7 +167,7 @@ class InstitutionCreateView(CreateAPIView):
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser]
 
-# ✅ Check if institution name exists
+# ✅ Check if institution name exists (Improved)
 class InstitutionNameCheckView(APIView):
     permission_classes = [AllowAny]
 
@@ -176,5 +176,6 @@ class InstitutionNameCheckView(APIView):
         if not name:
             return Response({"error": "Institution name is required."}, status=400)
 
+        name = name.strip()
         exists = Institution.objects.filter(name__iexact=name).exists()
-        return Response({"exists": exists}, status=200)
+        return Response({"name": name, "exists": exists}, status=200)

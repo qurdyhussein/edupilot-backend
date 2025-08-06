@@ -9,7 +9,7 @@ class Profile(models.Model):
     reset_code_created_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.username}'s Profile"
+        return f"{self.user.username if self.user else 'Anonymous'}'s Profile"
 
     def is_reset_code_expired(self):
         if not self.reset_code_created_at:
@@ -35,3 +35,8 @@ class Institution(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.code})"
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Institution"
+        verbose_name_plural = "Institutions"
