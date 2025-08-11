@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .views import (
     AdminSignupView,
     admin_login,
@@ -13,6 +14,7 @@ urlpatterns = [
     path('admin/login/', admin_login, name='admin-login'),
     path('password/request-reset/', RequestPasswordResetView.as_view(), name='request-password-reset'),
     path('password/confirm-reset/', ConfirmPasswordResetView.as_view(), name='confirm-password-reset'),
-    path('institutions/', InstitutionCreateView.as_view(), name='institution-create'),
+    path('api/institutions/', InstitutionCreateView.as_view(), name='institution-create'),
     path('institutions/check-name/', InstitutionNameCheckView.as_view(), name='institution-name-check'),  # ✅ Endpoint mpya
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
 ]

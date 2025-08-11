@@ -7,7 +7,6 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.generics import CreateAPIView
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth import authenticate
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 from django.core.mail import EmailMessage
@@ -16,7 +15,7 @@ from django.conf import settings
 from accounts.models import Profile
 from .models import Institution
 from .serializers import InstitutionSerializer
-import jwt
+from rest_framework_simplejwt.views import TokenObtainPairView
 import datetime
 
 RESET_CODE_EXPIRY_MINUTES = getattr(settings, 'RESET_CODE_EXPIRY_MINUTES', 15)
@@ -59,41 +58,6 @@ class AdminSignupView(APIView):
 
         return Response({'message': 'Akaunti ya admin imeundwa kwa mafanikio.'},
                         status=status.HTTP_201_CREATED)
-
-@api_view(["POST", "OPTIONS"])
-@permission_classes([AllowAny])
-def admin_login(request):
-    if request.method == "OPTIONS":
-        return Response(status=200)
-
-    email = request.data.get("email")
-    password = request.data.get("password")
-
-    if not email or not password:
-        return Response({"error": "Email na password vinahitajika."},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        return Response({"error": "Email au password si sahihi."},
-                        status=status.HTTP_401_UNAUTHORIZED)
-
-    authenticated_user = authenticate(username=user.username, password=password)
-
-    if authenticated_user is not None and authenticated_user.is_staff:
-        payload = {
-            "id": authenticated_user.id,
-            "email": authenticated_user.email
-        }
-        token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-        if isinstance(token, bytes):
-            token = token.decode('utf-8')
-
-        return Response({"token": token}, status=status.HTTP_200_OK)
-
-    return Response({"error": "Email au password si sahihi."},
-                    status=status.HTTP_401_UNAUTHORIZED)
 
 class RequestPasswordResetView(APIView):
     def post(self, request):
