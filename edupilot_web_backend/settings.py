@@ -42,8 +42,7 @@ SECRET_KEY = "django-insecure-w#q&hs6t+zjis87%se-d+j-d^n8#nr52o0!&z&b9k6kng+itko
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['edupilot-backend-f5sa.onrender.com']
-
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'edupilot-backend-f5sa.onrender.com']
 
 # Application definition
 
