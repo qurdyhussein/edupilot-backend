@@ -2,8 +2,18 @@ from rest_framework import serializers
 from .models import Institution
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+import random
+import string
 
 User = get_user_model()
+
+def generate_code(name=None):
+    prefix = "INST"
+    if name:
+        prefix = name.strip().split()[0].upper()
+        prefix = ''.join(filter(str.isalnum, prefix))[:6]  # safisha na kata prefix
+    suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    return f"{prefix}-{suffix}"
 
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +21,6 @@ class InstitutionSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
-            'code',
             'location',
             'contact_1',
             'contact_2',
@@ -19,8 +28,9 @@ class InstitutionSerializer(serializers.ModelSerializer):
             'created_by',
             'created_at',
             'updated_at',
+            'code',  # ← hakikisha model bado ina field ya code
         ]
-        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at', 'code']
 
     def validate_name(self, value):
         value = value.strip()
@@ -28,18 +38,15 @@ class InstitutionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Institution name already exists. Tafadhali chagua jina lingine.")
         return value
 
-    def validate_code(self, value):
-        value = value.strip()
-        if Institution.objects.filter(code__iexact=value).exists():
-            raise serializers.ValidationError("Institution code already exists. Tafadhali tumia code nyingine.")
-        if not value.isalnum():
-            raise serializers.ValidationError("Code must be alphanumeric (herufi na namba tu).")
-        return value
-
     def create(self, validated_data):
         request = self.context.get("request")
         if request and hasattr(request, "user") and request.user.is_authenticated:
             validated_data["created_by"] = request.user
+
+        # Generate code using name
+        name = validated_data.get("name", None)
+        validated_data["code"] = generate_code(name)
+
         return super().create(validated_data)
 
 class CustomEmailTokenObtainPairSerializer(TokenObtainPairSerializer):
