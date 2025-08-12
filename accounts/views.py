@@ -1,35 +1,43 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAdminUser
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.generics import CreateAPIView
-from django.contrib.auth.models import User
+import datetime
+import logging
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
-from django.utils.crypto import get_random_string
-from django.utils import timezone
+from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-from django.conf import settings
+from django.utils import timezone
+from django.utils.crypto import get_random_string
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import CreateAPIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 from accounts.models import Profile
 from .models import Institution
-from .serializers import InstitutionSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-import datetime
+from .serializers import InstitutionSerializer, CustomEmailTokenObtainPairSerializer
 
+logger = logging.getLogger(__name__)
 RESET_CODE_EXPIRY_MINUTES = getattr(settings, 'RESET_CODE_EXPIRY_MINUTES', 15)
 
 def send_branded_email(subject, to_email, template_name, context):
-    html_content = render_to_string(template_name, context)
-    email = EmailMessage(
-        subject=subject,
-        body=html_content,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[to_email]
-    )
-    email.content_subtype = 'html'
-    email.send()
+    try:
+        html_content = render_to_string(template_name, context)
+        email = EmailMessage(
+            subject=subject,
+            body=html_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[to_email]
+        )
+        email.content_subtype = 'html'
+        email.send()
+    except Exception as e:
+        logger.error(f"Error sending email to {to_email}: {e}")
+        raise
 
 class AdminSignupView(APIView):
     permission_classes = [AllowAny]
@@ -40,11 +48,11 @@ class AdminSignupView(APIView):
         password = request.data.get('password')
 
         if not username or not email or not password:
-            return Response({'message': 'Tafadhali jaza username, email na password.'},
+            return Response({'error': 'Tafadhali jaza username, email na password.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=email).exists():
-            return Response({'message': 'Email tayari imesajiliwa.'},
+            return Response({'error': 'Email tayari imesajiliwa.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create(
@@ -60,9 +68,15 @@ class AdminSignupView(APIView):
                         status=status.HTTP_201_CREATED)
 
 class RequestPasswordResetView(APIView):
+    throttle_classes = [AnonRateThrottle]
+    permission_classes = [AllowAny]
+
     def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Tafadhali weka email.'}, status=400)
+
         try:
-            email = request.data.get('email')
             user = User.objects.get(email=email)
             profile, _ = Profile.objects.get_or_create(user=user)
 
@@ -78,14 +92,15 @@ class RequestPasswordResetView(APIView):
                 context={'username': user.username, 'reset_code': reset_code}
             )
 
-            return Response({'message': 'Reset code imetumwa kwa email.'}, status=200)
+            masked_email = email[:2] + "****" + email[-10:]
+            return Response({'message': f'Reset code imetumwa kwa {masked_email}.'}, status=200)
 
         except User.DoesNotExist:
             return Response({'error': 'Hakuna akaunti yenye email hiyo.'}, status=404)
 
         except Exception as e:
-            print(f"Error sending email: {e}")
-            return Response({'error': str(e)}, status=500)
+            logger.error(f"Error during password reset request: {e}")
+            return Response({'error': 'Tatizo limetokea wakati wa kutuma email.'}, status=500)
 
 class ConfirmPasswordResetView(APIView):
     permission_classes = [AllowAny]
@@ -124,14 +139,12 @@ class ConfirmPasswordResetView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'Mtumiaji hajapatikana.'}, status=404)
 
-# ✅ Institution Create with Logo Upload
 class InstitutionCreateView(CreateAPIView):
     queryset = Institution.objects.all()
     serializer_class = InstitutionSerializer
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser]
 
-# ✅ Check if institution name exists (Improved)
 class InstitutionNameCheckView(APIView):
     permission_classes = [AllowAny]
 
@@ -143,3 +156,6 @@ class InstitutionNameCheckView(APIView):
         name = name.strip()
         exists = Institution.objects.filter(name__iexact=name).exists()
         return Response({"name": name, "exists": exists}, status=200)
+
+class CustomEmailTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomEmailTokenObtainPairSerializer
