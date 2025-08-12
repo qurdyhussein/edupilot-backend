@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView  # ✅ Added RetrieveAPIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
@@ -144,6 +144,11 @@ class InstitutionCreateView(CreateAPIView):
     serializer_class = InstitutionSerializer
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser]
+
+class InstitutionDetailView(RetrieveAPIView):  # ✅ Hii ndiyo mpya
+    queryset = Institution.objects.all()
+    serializer_class = InstitutionSerializer
+    permission_classes = [IsAdminUser]
 
 class InstitutionNameCheckView(APIView):
     permission_classes = [AllowAny]
