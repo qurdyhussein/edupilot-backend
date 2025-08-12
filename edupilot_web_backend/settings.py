@@ -116,9 +116,12 @@ SIMPLE_JWT = {
 }
 
 # ✅ CORS Configuration (REVISED)
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+]
+
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:51020",
-    "http://localhost:57608",  # ✅ Added for Flutter Web login
+    
     "https://edupilot-web-1.onrender.com",
     "https://edupilot-web.web.app",
 ]
