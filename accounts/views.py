@@ -164,3 +164,21 @@ class InstitutionNameCheckView(APIView):
 
 class CustomEmailTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomEmailTokenObtainPairSerializer
+
+
+class MyInstitutionView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        user = request.user
+        print(f"[DEBUG] MyInstitutionView accessed by: {user} (is_staff={user.is_staff})")
+
+        institution = Institution.objects.filter(created_by=user).first()
+        if institution:
+            serializer = InstitutionSerializer(institution)
+            return Response(serializer.data, status=200)
+
+        return Response({
+            "message": "No Institution is Registered.",
+            "admin_email": user.email
+        }, status=404)
