@@ -29,9 +29,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # ✅ Imewekwa juu kabisa
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -115,16 +115,8 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
-# ✅ CORS Configuration (REVISED)
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^http://localhost:\d+$",
-]
-
-CORS_ALLOWED_ORIGINS = [
-    
-    "https://edupilot-web-1.onrender.com",
-    "https://edupilot-web.web.app",
-]
+# ✅ CORS Configuration (Testing Mode)
+CORS_ALLOW_ALL_ORIGINS = True  # Ruhusu origin zote kwa sasa
 
 # ✅ Password Reset Code Expiry
 RESET_CODE_EXPIRY_MINUTES = 15
