@@ -8,6 +8,7 @@ from .views import (
     InstitutionCreateView,
     InstitutionDetailView,           # ✅ Hii imeongezwa
     InstitutionNameCheckView,
+    MyInstitutionView,
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path('institutions/check-name/', InstitutionNameCheckView.as_view(), name='institution-name-check'),
     path('token/', CustomEmailTokenObtainPairView.as_view(), name='custom_token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('institutions/my/', MyInstitutionView.as_view(), name='my-institution'),
 ]
