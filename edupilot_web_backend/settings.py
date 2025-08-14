@@ -11,7 +11,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 SECRET_KEY = "django-insecure-w#q&hs6t+zjis87%se-d+j-d^n8#nr52o0!&z&b9k6kng+itko"
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'edupilot-backend-f5sa.onrender.com']
 AUTH_USER_MODEL = 'accounts.User'
